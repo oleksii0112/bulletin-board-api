@@ -1,5 +1,9 @@
-import type { Request, Response, NextFunction } from "express";
-import type { RegisterBody, LoginBody } from "../validators/auth.validator.ts";
+import type { Request, Response } from "express";
+import type {
+  RegisterBody,
+  LoginBody,
+  RefreshBody,
+} from "../validators/auth.validator.ts";
 import prisma from "../../prisma/client.ts";
 import createHttpError from "http-errors";
 import bcrypt from "bcrypt";
@@ -83,4 +87,29 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response) => {
     },
     ...tokens,
   });
+};
+
+export const refresh = async (
+  req: Request<{}, {}, RefreshBody>,
+  res: Response,
+) => {
+  const { refreshToken: oldRefreshToken } = req.body;
+  try {
+    const payload = jwt.verify(oldRefreshToken, JWT_SECRET);
+    if (typeof payload === "string" || payload.type !== "refresh") {
+      throw new Error("Not a refresh token");
+    }
+  } catch {
+    throw createHttpError(401, "Invalid or expired refresh token");
+  }
+  const storedToken = await prisma.refreshToken.findUnique({
+    where: {
+      token: oldRefreshToken,
+    },
+  });
+  if (!storedToken) {
+    throw createHttpError(401, "Invalid or expired refresh token");
+  }
+  const tokens = await createTokens(storedToken.userId);
+  res.status(200).json(tokens);
 };

@@ -61,3 +61,18 @@ registry.registerPath({
     401: { description: "Invalid credentials" },
   },
 });
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/refresh",
+  tags: ["Auth"],
+  summary: "Get a new token pair using a refresh token",
+  request: {
+    body: { content: { "application/json": { schema: refreshSchema } } },
+  },
+  responses: {
+    201: { description: "New token pair returned, old refresh token revoked" },
+    400: { description: "Validation error" },
+    401: { description: "Invalid or expired refresh token" },
+  },
+});
