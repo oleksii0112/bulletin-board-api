@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { regex, z } from "zod";
 import { registry } from "../openapi.ts";
 
 export const registerSchema = registry.register(
@@ -44,5 +44,20 @@ registry.registerPath({
     201: { description: "User registered, token pair returned" },
     400: { description: "Validation error" },
     409: { description: "Username or email already taken" },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/login",
+  tags: ["Auth"],
+  summary: "Log in with username and password",
+  request: {
+    body: { content: { "application/json": { schema: loginSchema } } },
+  },
+  responses: {
+    200: { description: "Logged in, new token pair returned" },
+    400: { description: "Validation error" },
+    401: { description: "Invalid credentials" },
   },
 });

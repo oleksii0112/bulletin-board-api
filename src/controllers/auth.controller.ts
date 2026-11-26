@@ -71,4 +71,16 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response) => {
   if (!isValidPassword) {
     throw createHttpError(401, "Invalid credentials");
   }
+
+  const tokens = await createTokens(user.id);
+
+  res.status(200).json({
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+    },
+    ...tokens,
+  });
 };
