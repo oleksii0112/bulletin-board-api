@@ -71,8 +71,33 @@ registry.registerPath({
     body: { content: { "application/json": { schema: refreshSchema } } },
   },
   responses: {
-    201: { description: "New token pair returned, old refresh token revoked" },
+    200: { description: "New token pair returned, old refresh token revoked" },
     400: { description: "Validation error" },
     401: { description: "Invalid or expired refresh token" },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/auth/logout",
+  tags: ["Auth"],
+  summary: "Log out and revoke the refresh token",
+  security: [{ bearerAuth: [] }],
+  responses: {
+    204: { description: "Logged out, refresh token revoked" },
+    401: { description: "Missing, invalid or expired access token" },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/auth/me",
+  tags: ["Auth"],
+  summary: "Get the current user's profile",
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: { description: "Current user without the password field" },
+    401: { description: "Missing, invalid or expired access token" },
+    404: { description: "User not found" },
   },
 });

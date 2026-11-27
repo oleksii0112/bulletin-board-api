@@ -113,3 +113,28 @@ export const refresh = async (
   const tokens = await createTokens(storedToken.userId);
   res.status(200).json(tokens);
 };
+
+export const logout = async (req: Request, res: Response) => {
+  const userId = Number(req.user!.sub);
+
+  await prisma.refreshToken.deleteMany({
+    where: { userId },
+  });
+
+  res.status(204).end();
+};
+
+export const getMe = async (req: Request, res: Response) => {
+  const userId = Number(req.user!.sub);
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    omit: {
+      password: true,
+    },
+  });
+  if (!user) {
+    throw createHttpError(404, "User not found");
+  }
+
+  res.status(200).json(user);
+};
